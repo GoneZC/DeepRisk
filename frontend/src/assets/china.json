@@ -1,0 +1,21 @@
+// 创建目录和文件：frontend/src/assets/china.json
+// 由于中国地图JSON文件较大，您需要从以下途径获取：
+// 1. 从ECharts官方GitHub下载: https://github.com/apache/echarts/tree/master/examples/data/asset/geo
+// 2. 或使用简化版的中国地图数据
+
+// 简化版中国地图数据示例（仅供参考，完整版请从官方获取）
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "710000",
+      "type": "Feature",
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [...]
+      },
+      "properties": {"id": "710000", "name": "台湾", "cp": [121.0254, 23.5986]}
+    },
+    // ... 其他省份数据
+  ]
+} 

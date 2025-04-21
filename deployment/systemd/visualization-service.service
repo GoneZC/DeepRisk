@@ -1,0 +1,15 @@
+[Unit]
+Description=visualization-service
+After=network.target
+
+[Service]
+User=服务用户
+WorkingDirectory=/服务路径/visualization-service
+ExecStart=/opt/jdk/bin/java -jar /服务路径/visualization-service/visualization-service.jar
+SuccessExitStatus=143
+TimeoutStopSec=10
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,171 @@
+项目名称: Insurance Claim Anti-Fraud System
+
+核心目标: 高性能、高并发、低延迟、微服务架构的智能医保反欺诈系统
+
+要实现的功能: 
+(1)可视化看板:
+(2)数据查询: 查询结算信息表+点击详情查看费用明细
+(3)智能监管: 规则引擎实时检测(基于费用明细表,最小粒度为一个具体项目)+深度分析(最小粒度为医生一天的行为,针对不同场景使用不同的深度模型)
+
+显示的信息有: 
+表setl_d2409的字段:MDTRT_ID、PSN_NO、GEND、AGE、DISE_NAME、MED_TYPE、BEGNDATE、ENDDATE、MEDFEE_SUMAMT、FULAMT_OWNPAY_AMT、HIFP_PAY 
+点击诊断详情显示表setl_diag_list_d2409的字段:INOUT_DIAG_TYPE、DIAG_TYPE、MAINDIAG_FLAG、DIAG_SRT_NO、DIAG_NAME、ADM_COND、DIAG_DEPT、DIAG_TIME
+点击治疗详情显示表fee_list_d2409的字段:HILIST_NAME、LIST_TYPE、CHRGITM_LV、PRODNAME、DOSFORM_NAME、BILG_DEPT_NAME、PRCU_DRUG_FLAG、FEE_OCUR_TIME
+
+controller：负责接受HTTP请求，调用service，返回HTTP响应
+service：负责业务逻辑处理，调用respository层
+repository：负责数据库操作，提供基础CRUD
+model：数据模型定义，数据库表映射
+
+就诊ID：44039100000528520001
+
+微服务架构：
+API网关服务：统一接入点，请求路由，负载均衡
+用户认证服务：用户管理，权限控制，令牌颁发
+数据采集服务：医疗数据收集与标准化，提供数据给其他服务使用
+费用查询服务：对数据实现不同粒度的查询
+规则引擎服务：实时检测费用明细异常
+深度分析服务：基于多个机器学习模型（Pytorch训练好的pt文件）的医生行为分析模型，使用DJL
+可视化服务：看板和图表展示
+公共服务：配置中心、日志收集、监控告警
+
+
+医疗监管系统/
+├── api-gateway/                  # API网关服务
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── java/com/demo/
+│   │   │   │   ├── ApiGatewayApplication.java
+│   │   │   │   ├── config/
+│   │   │   │   └── filter/
+│   │   │   └── resources/
+│   │   │       ├── application.yml
+│   │   │       └── application-prod.yml
+│   │   └── test/
+│   └── pom.xml
+│
+├── auth-service/                 # 用户认证服务
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── java/com/demo/
+│   │   │   │   ├── AuthServiceApplication.java
+│   │   │   │   ├── controller/
+│   │   │   │   ├── service/
+│   │   │   │   ├── repository/
+│   │   │   │   └── model/
+│   │   │   └── resources/
+│   │   │       └── application.yml
+│   │   └── test/
+│   └── pom.xml
+│
+├── data-collection-service/      # 数据采集服务
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── java/com/demo/
+│   │   │   │   ├── DataCollectionApplication.java
+│   │   │   │   ├── controller/
+│   │   │   │   ├── service/
+│   │   │   │   ├── repository/
+│   │   │   │   └── model/
+│   │   │   └── resources/
+│   │   │       └── application.yml
+│   │   └── test/
+│   └── pom.xml
+│
+├── fee-query-service/            # 费用查询服务
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── java/com/demo/
+│   │   │   │   ├── FeeQueryApplication.java
+│   │   │   │   ├── controller/
+│   │   │   │   │   └── FeeQueryController.java
+│   │   │   │   ├── service/
+│   │   │   │   │   └── FeeQueryService.java
+│   │   │   │   ├── repository/
+│   │   │   │   │   ├── FeeDetailRepository.java
+│   │   │   │   │   └── SettlementDiagnosisRepository.java
+│   │   │   │   └── model/
+│   │   │   │       ├── FeeDetail.java
+│   │   │   │       └── SettlementDiagnosis.java
+│   │   │   └── resources/
+│   │   │       └── application.yml
+│   │   └── test/
+│   └── pom.xml
+│
+├── rule-engine-service/          # 规则引擎服务
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── java/com/demo/
+│   │   │   │   ├── RuleEngineApplication.java
+│   │   │   │   ├── controller/
+│   │   │   │   ├── service/
+│   │   │   │   │   └── RuleService.java
+│   │   │   │   ├── repository/
+│   │   │   │   ├── model/
+│   │   │   │   └── dto/
+│   │   │   │       └── FeeDetailDTO.java
+│   │   │   └── resources/
+│   │   │       └── application.yml
+│   │   └── test/
+│   └── pom.xml
+│
+├── deep-analysis-service/        # 深度分析服务
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── java/com/demo/
+│   │   │   │   ├── DeepAnalysisApplication.java
+│   │   │   │   ├── controller/
+│   │   │   │   ├── service/
+│   │   │   │   ├── repository/
+│   │   │   │   └── model/
+│   │   │   └── resources/
+│   │   │       └── application.yml
+│   │   └── test/
+│   └── pom.xml
+│
+├── visualization-service/        # 可视化服务
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── java/com/demo/
+│   │   │   │   ├── VisualizationApplication.java
+│   │   │   │   ├── controller/
+│   │   │   │   ├── service/
+│   │   │   │   ├── repository/
+│   │   │   │   └── model/
+│   │   │   └── resources/
+│   │   │       └── application.yml
+│   │   └── test/
+│   └── pom.xml
+│
+├── common-library/               # 公共库（可选）
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── java/com/demo/common/
+│   │   │   │   ├── dto/
+│   │   │   │   ├── exception/
+│   │   │   │   └── util/
+│   │   │   └── resources/
+│   │   └── test/
+│   └── pom.xml
+│
+├── deployment/                   # 部署相关脚本和配置
+│   ├── systemd/                  # 服务配置文件
+│   │   ├── api-gateway.service
+│   │   ├── auth-service.service
+│   │   ├── data-collection.service
+│   │   ├── fee-query.service
+│   │   ├── rule-engine.service
+│   │   ├── deep-analysis.service
+│   │   └── visualization.service
+│   ├── scripts/                  # 部署和维护脚本
+│   │   ├── start-services.sh     # 启动服务脚本
+│   │   ├── stop-services.sh
+│   │   └── check-dependencies.sh # 依赖检查脚本
+│   └── config/                   # 环境配置
+│       ├── hosts                 # 主机名映射
+│       └── nginx.conf            # Nginx配置（如果使用）
+│
+└── docs/                         # 项目文档
+    ├── architecture.md           # 架构文档
+    ├── api-docs/                 # API文档
+    └── README.md                 # 项目说明

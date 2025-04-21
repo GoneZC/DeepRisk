@@ -1,0 +1,28 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
+    "axios": "^1.6.2",
+    "echarts": "^5.4.3",
+    "element-plus": "^2.3.14",
+    "vue": "^3.4.0",
+    "vue-echarts": "^6.5.0",
+    "vue-router": "^4.2.5"
+  },
+  "devDependencies": {
+    "@babel/eslint-parser": "^7.23.9",
+    "@vue/cli-plugin-babel": "^5.0.8",
+    "@vue/cli-plugin-eslint": "^5.0.8",
+    "@vue/cli-service": "^5.0.8",
+    "eslint": "^8.57.1",
+    "eslint-plugin-vue": "^9.23.0",
+    "vue-eslint-parser": "^9.4.0"
+  }
+}

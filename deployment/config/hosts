@@ -1,0 +1,8 @@
+127.0.0.1       localhost
+192.168.1.101   fee-query-service
+192.168.1.102   rule-engine-service
+192.168.1.103   auth-service
+192.168.1.104   data-collection-service
+192.168.1.105   deep-analysis-service
+192.168.1.106   visualization-service
+192.168.1.107   api-gateway

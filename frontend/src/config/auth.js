@@ -1,0 +1,8 @@
+// 医保局用户令牌
+export const adminToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJJTlNVUkFOQ0VfQlVSRUFVIiwiaWF0IjoxNzEzNjg0MjY0LCJleHAiOjE3MTYyNzYyNjR9.KoGW6HBQd46gwqoSidVdO2vPJ-d-fBbf_5oAE9e5t9A";
+
+// 医院用户令牌
+export const hospitalToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJob3NwaXRhbDEiLCJyb2xlIjoiSE9TUElUQUwiLCJob3NwaXRhbENvZGUiOiJIMTAwMDEiLCJpYXQiOjE3MTM2ODQyNjQsImV4cCI6MTcxNjI3NjI2NH0.3LnIYTtJ-dHcv0M6-FVNO2lCY_TQh4D7-U2HPG1MZg0";
+
+// 在JWT令牌中查找过期时间（exp声明）
+// 可以通过jwt.io网站解码并验证令牌 
