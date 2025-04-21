@@ -16,8 +16,8 @@ import java.util.List;
 import org.springframework.util.StringUtils;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
-import com.demo.utils.UserContext;
 import com.demo.model.UserInfo;
+import com.demo.utils.UserContext;
 
 @Service
 public class SettlementService {  
@@ -46,7 +46,7 @@ public class SettlementService {
 
     // 获取结算数据
     @Cacheable(value = "settlementList", 
-               key = "{#mdtrtId,#psnNo,#medTypes?.toString(),#page,#size}")
+               key = "{#mdtrtId,#psnNo,#medTypes?.toString(),#page,#size,T(com.demo.utils.UserContext).getCurrentUser()?.getRole(),T(com.demo.utils.UserContext).getCurrentUser()?.getHospitalCode()}")
     public List<Settlement> getPagedSettlementList(String mdtrtId, String psnNo, 
                                                   List<String> medTypes, int page, int size) {
         System.out.println("从数据库获取第" + page + "页结算数据");
@@ -57,7 +57,8 @@ public class SettlementService {
     }
 
     // 获取结算数据总数
-    @Cacheable(value = "settlementCount", key = "{#mdtrtId,#psnNo,#medTypes?.toString()}")
+    @Cacheable(value = "settlementCount", 
+               key = "{#mdtrtId,#psnNo,#medTypes?.toString(),T(com.demo.utils.UserContext).getCurrentUser()?.getRole(),T(com.demo.utils.UserContext).getCurrentUser()?.getHospitalCode()}")
     public long getSettlementCount(String mdtrtId, String psnNo, List<String> medTypes) {
         System.out.println("从数据库获取结算数据总数");
         Specification<Settlement> spec = createSpecification(mdtrtId, psnNo, medTypes);
@@ -86,11 +87,20 @@ public class SettlementService {
             }
             
             // 根据用户角色添加数据权限过滤
-            // UserInfo userInfo = UserContext.getCurrentUser();
-            // if (userInfo != null && !"INSURANCE_BUREAU".equals(userInfo.getRole())) {
-            //     // 如果不是医保局角色，只能查看自己医院的数据
-            //     predicates.add(cb.equal(root.get("fixmedinsCode"), userInfo.getHospitalCode()));
-            // }
+            UserInfo userInfo = UserContext.getCurrentUser();
+            if (userInfo != null) {
+                // 如果不是医保局角色，只能查看自己医院的数据
+                if (!"INSURANCE_BUREAU".equals(userInfo.getRole())) {
+                    predicates.add(cb.equal(root.get("fixmedinsCode"), userInfo.getHospitalCode()));
+                    System.out.println("添加医院限制: " + userInfo.getHospitalCode());
+                } else {
+                    System.out.println("医保局用户查询，无医院限制");
+                }
+            } else {
+                System.out.println("警告: 无法获取用户信息，默认不显示任何数据");
+                // 如果没有用户信息，返回空结果集
+                predicates.add(cb.equal(cb.literal(1), 0));
+            }
             
             return cb.and(predicates.toArray(new Predicate[0]));
         };

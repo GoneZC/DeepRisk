@@ -185,7 +185,6 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
 import { Search } from '@element-plus/icons-vue'
-import { adminToken, hospitalToken } from '../config/auth.js'
 
 const mdtrtId = ref('')
 const psnNo = ref('')
@@ -237,14 +236,40 @@ const medTypeOptions = [
   { value: '24', label: '急诊转住院' }
 ];
 
-// 添加生命周期钩子
+// 初始化
 onMounted(() => {
+  login()
   loadInitialData()
 })
 
 const loadInitialData = () => {
   search(1);
 }
+
+const login = async () => {
+  try {
+    console.log('开始登录请求...');
+    const response = await axios.post('/api/auth/login', {
+      // username: 'admin',
+      // password: 'admin123'
+      username: 'hospital1',
+      password: '123'
+    });
+    
+    console.log('登录响应:', response.data);
+    localStorage.setItem('token', response.data.token);
+    console.log('登录成功，令牌已保存');
+  } catch (error) {
+    console.error('登录失败', error.message);
+    if (error.response) {
+      console.error('错误状态:', error.response.status);
+      console.error('错误数据:', error.response.data);
+    } else if (error.request) {
+      console.error('请求发送但没有响应');
+    }
+  }
+}
+
 
 const search = async (pageNum = 1) => {
   try {
@@ -273,6 +298,8 @@ const search = async (pageNum = 1) => {
     console.log('认证头:', headers.Authorization);
     
     const response = await axios.post('/api/settlements/search', requestParams, { headers })
+    // const response = await axios.post('http://localhost:8082/api/settlements/search', requestParams, { headers })
+
     
     console.log('收到响应:', response.data)
     

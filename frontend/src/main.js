@@ -5,7 +5,6 @@ import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import * as Icons from '@element-plus/icons-vue'
 import axios from 'axios'
-import { adminToken, hospitalToken } from './config/auth.js'
 
 // 添加这段代码来抑制ResizeObserver警告
 const debounce = (fn, delay) => {
@@ -38,18 +37,6 @@ app.use(ElementPlus)
 Object.keys(Icons).forEach(key => {
   app.component(key, Icons[key])
 })
-
-// 配置请求拦截器 - 自动添加认证头
-axios.interceptors.request.use(config => {
-  // 使用医保局用户令牌
-  config.headers.Authorization = `Bearer ${adminToken}`;
-  
-  // 调试输出
-  console.log('请求头:', config.headers);
-  console.log('请求URL:', config.url);
-  
-  return config;
-});
 
 // 添加响应拦截器查看错误
 axios.interceptors.response.use(
