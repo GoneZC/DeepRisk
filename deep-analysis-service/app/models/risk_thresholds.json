@@ -1,0 +1,25 @@
+{
+    "fee_score": {
+        "low_max": 4.968068648546857e-05,
+        "medium_min": 4.968068648546857e-05,
+        "medium_max": 7.26568685776228e-05,
+        "high_min": 7.26568685776228e-05
+    },
+    "drug_score": {
+        "low_max": 2.5026194783982984e-05,
+        "medium_min": 2.5026194783982984e-05,
+        "medium_max": 6.306187976739312e-05,
+        "high_min": 6.306187976739312e-05
+    },
+    "diag_score": {
+        "low_max": 9.658397547267317e-03,
+        "medium_min": 9.658397547267317e-03,
+        "medium_max": 0.01602223515300128,
+        "high_min": 0.01602223515300128
+    },
+    "method": "percentile",
+    "percentiles": {
+        "low_max": 70,
+        "high_min": 90
+    }
+}

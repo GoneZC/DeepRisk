@@ -27,21 +27,32 @@
           <span>数据查询</span>
         </el-menu-item>
         
-        <!-- 智能审核 - 带子菜单 -->
-        <el-sub-menu index="/audit">
+        <!-- 新增：规则引擎 -->
+        <el-menu-item index="/rule-engine">
+          <el-icon><SetUp /></el-icon>
+          <span>规则引擎</span>
+        </el-menu-item>
+        
+        <!-- 智能审核改为深度分析 -->
+        <el-sub-menu index="/analysis">
           <template #title>
             <el-icon><Cpu /></el-icon>
-            <span>智能审核</span>
+            <span>深度分析</span>
           </template>
           
-          <el-menu-item index="/audit/outpatient">
+          <el-menu-item index="/analysis/outpatient">
             <el-icon><FirstAidKit /></el-icon>
-            <span>门诊审核</span>
+            <span>门诊监管</span>
           </el-menu-item>
           
-          <el-menu-item index="/audit/inpatient">
+          <el-menu-item index="/analysis/inpatient">
             <el-icon><OfficeBuilding /></el-icon>
-            <span>住院审核</span>
+            <span>住院监管</span>
+          </el-menu-item>
+          
+          <el-menu-item index="/analysis/group-fraud">
+            <el-icon><User /></el-icon>
+            <span>团体欺诈识别</span>
           </el-menu-item>
         </el-sub-menu>
       </el-menu>
@@ -75,7 +86,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { DataLine, Search, Cpu, FirstAidKit, OfficeBuilding, ArrowDown, Monitor } from '@element-plus/icons-vue'
+import { DataLine, Search, Cpu, FirstAidKit, OfficeBuilding, ArrowDown, Monitor, SetUp, User } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const activeIndex = ref('/')
@@ -83,8 +94,8 @@ const activeIndex = ref('/')
 // 保持当前路由高亮
 watch(() => route.path, (newPath) => {
   // 主路径和子路径的一致性处理
-  if (newPath.startsWith('/audit/')) {
-    activeIndex.value = '/audit'
+  if (newPath.startsWith('/analysis/')) {
+    activeIndex.value = '/analysis'
   } else {
     activeIndex.value = newPath
   }

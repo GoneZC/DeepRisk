@@ -9,7 +9,7 @@ PSN_NO（人员编号）
 PSN_INSU_RLTS_ID（人员参保关系 ID）
 INSU_ADMDVS（参保所属医保区划）
 PAY_LOC（支付地点类别）
-MED_TYPE（医疗类别）
+MED_TYPE（医疗类别） 
 CNT（数量）
 PRIC（单价）
 DET_ITEM_FEE_SUMAMT（明细项目费用总额）
@@ -266,3 +266,9 @@ OPTER_ID（经办人 ID）
 OPT_TIME（经办时间）
 OPTINS_NO（经办机构编号）
 EVT_INST_ID（事件实例 ID）
+
+医生社区(doctor_community)
+BILG_DR_CODE()
+COM_ID(社区编号)
+COM_NAME(社区名称)
+COM_DRUG(社区内的药品)

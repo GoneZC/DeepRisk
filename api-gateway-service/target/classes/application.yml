@@ -20,17 +20,32 @@ spring:
           filters:
             - JwtAuthentication
             
+        - id: outpatient-monitor-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/outpatient-monitor/**
+            
+        - id: rule-engine-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/rule-engine/**
+          filters:
+            - StripPrefix=0
+            
+        - id: deep-analysis-service
+          uri: http://localhost:5000
+          predicates:
+            - Path=/api/risk-assessment/**
+          filters:
+            - StripPrefix=0
+
+            
       globalcors:
         corsConfigurations:
           '[/**]':
             allowedOrigins: '*'
             allowedMethods: '*'
             allowedHeaders: '*'
-
-# JWT配置
-jwt:
-  secret: your_jwt_secret_key_should_be_at_least_32_bytes_long
-  expiration: 86400000  # 24小时有效期(毫秒)
 
 # 关闭Eureka客户端
 eureka:
@@ -39,6 +54,6 @@ eureka:
 
 logging:
   level:
-    org.springframework.cloud.gateway: DEBUG
-    com.demo.filter: DEBUG
-    reactor.netty: INFO
+    '[org.springframework.cloud.gateway]': DEBUG
+    '[com.demo.filter]': DEBUG
+    '[reactor.netty]': INFO

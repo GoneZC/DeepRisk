@@ -52,3 +52,9 @@ app.mount('#app')
 
 // eslint-disable-next-line no-unused-vars
 const unusedVar = 'test' 
+
+window.addEventListener('error', (event) => {
+  if (event.message.includes('ResizeObserver')) {
+    event.stopImmediatePropagation();
+  }
+});
