@@ -4,7 +4,6 @@
       <template #header>
         <div class="card-header">
           <span class="title">门诊监管</span>
-          <el-tag type="success">实时监控</el-tag>
         </div>
       </template>
 
@@ -87,7 +86,7 @@
         </el-table-column>
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="scope">
-            <el-button type="primary" link @click="handleRiskAssessment(scope.row)">风险评估</el-button>
+            <el-button type="primary" link @click="handleAsyncRiskAssessment(scope.row)">风险评估</el-button>
             <el-button type="success" link @click="viewDetails(scope.row)">查看详情</el-button>
           </template>
         </el-table-column>
@@ -130,7 +129,7 @@
                   <el-tag :type="getRiskTagType(selectedDoctor.feeRiskLevel)">{{ selectedDoctor.feeRiskLevel || '未评估' }}</el-tag>
                 </span>
                 <span class="risk-item">
-                  药品评估: 
+                  用药评估: 
                   <el-tag :type="getRiskTagType(selectedDoctor.drugRiskLevel)">{{ selectedDoctor.drugRiskLevel || '未评估' }}</el-tag>
                 </span>
                 <span class="risk-item">
@@ -260,52 +259,71 @@ const fetchDoctorData = async () => {
   }
 }
 
-// 风险评估处理
-const handleRiskAssessment = async (row) => {
-  // 不再显示弹窗
-  // riskDialogVisible.value = true 
+// 异步风险评估处理函数
+const handleAsyncRiskAssessment = async (row) => {
   selectedDoctor.value = row
   loading.value = true
   
   try {
-    // 通过网关访问Python服务，而不是直接访问
-    const response = await axios.post('/api/risk-assessment', {
+    // 发送异步风险评估请求
+    const response = await axios.post('/api/async-risk-assessment/assess', {
       doctorId: row.doctorId,
       date: row.prescriptionDate
     })
     
-    // 更新风险信息
-    const result = response.data
+    // 保存服务器返回的请求ID
+    const responseData = response.data
+    row.riskRequestId = responseData.split('ID: ')[1] // 从响应中提取请求ID
     
-    // 保存风险等级信息到医生对象
-    row.feeRiskLevel = result.feeRiskLevel || '正常'
-    row.drugRiskLevel = result.drugRiskLevel || '正常'
-    row.diagRiskLevel = result.diagRiskLevel || '正常'
-    row.fraudRisk = result.riskLevel || getHighestRiskLevel(row)
+    ElMessage({
+      message: '风险评估请求已提交，请稍后查看结果',
+      type: 'info'
+    })
+    
+    // 设置定时器，每隔2秒查询一次结果
+    row.resultTimer = setInterval(async () => {
+      try {
+        // 使用保存的请求ID查询结果
+        if (!row.riskRequestId) {
+          console.error('请求ID未定义，无法查询结果')
+          clearInterval(row.resultTimer)
+          return
+        }
+        
+        const resultResponse = await axios.get(`/api/async-risk-assessment/${row.riskRequestId}`)
+        
+        if (resultResponse.status === 200) {
+          // 确保在清除定时器前停止进一步执行
+          clearInterval(row.resultTimer)
+          row.resultTimer = null
+        
+          // 处理返回的风险评估结果
+          const riskResult = resultResponse.data
+          row.feeRiskLevel = riskResult.feeRiskLevel || '正常'
+          row.drugRiskLevel = riskResult.drugRiskLevel || '正常'
+          row.diagRiskLevel = riskResult.diagRiskLevel || '正常'
+          row.riskLevel = riskResult.riskLevel || '未知'
+          row.riskStatus = 'completed'
+          
+          // 更新UI显示
+          ElMessage.success('风险评估完成')
+        }
+      } catch (error) {
+        if (error.response && error.response.status !== 404) {
+          clearInterval(row.resultTimer)
+          row.resultTimer = null
+          console.error('获取风险评估结果失败:', error)
+        }
+        // 404 表示结果尚未准备好，继续等待
+      }
+    }, 2000)
     
     loading.value = false
   } catch (error) {
-    console.error('风险评估失败:', error)
-    ElMessage.error('风险评估失败')
+    console.error('提交风险评估请求失败:', error)
+    ElMessage.error('提交风险评估请求失败')
     loading.value = false
   }
-}
-
-// 确认风险评估结果
-const confirmRiskAssessment = () => {
-  const riskLevel = getRiskLevel(riskScore.value)
-  
-  // 更新本地数据
-  if (selectedDoctor.value) {
-    // 找到当前医生并更新风险等级
-    const index = doctorList.value.findIndex(item => item.doctorId === selectedDoctor.value.doctorId)
-    if (index !== -1) {
-      doctorList.value[index].fraudRisk = riskLevel
-    }
-  }
-  
-  ElMessage.success('风险评估完成')
-  riskDialogVisible.value = false
 }
 
 // 查询处理
@@ -345,13 +363,6 @@ const formatCurrency = (value) => {
   return parseFloat(value).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')
 }
 
-const getRiskLevel = (score) => {
-  if (score >= 75) return '高风险'
-  if (score >= 50) return '中风险'
-  if (score >= 25) return '低风险'
-  return '正常'
-}
-
 const getRiskTagType = (level) => {
   if (level === '高风险') return 'danger'
   if (level === '中风险') return 'warning'
@@ -359,12 +370,6 @@ const getRiskTagType = (level) => {
   return 'info'
 }
 
-const getProgressColor = (score) => {
-  if (score >= 75) return '#F56C6C'
-  if (score >= 50) return '#E6A23C'
-  if (score >= 25) return '#67C23A'
-  return '#909399'
-}
 
 // 显示社区药品
 const showCommunityDrugs = (row) => {

@@ -12,6 +12,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Component
 public class JwtAuthenticationFilter implements GatewayFilter {
 
@@ -19,9 +22,32 @@ public class JwtAuthenticationFilter implements GatewayFilter {
     
     // 配置白名单路径（不需要令牌的路径）
     private final String[] whitelist = {"/api/auth/", "/api/diagnosis-details/", "/api/fee-details/"};
+    
+    // 存储需要验证的路径模式
+    private Set<String> protectedPaths = new HashSet<>();
 
     public JwtAuthenticationFilter(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
+    }
+    
+    /**
+     * 创建一个新的过滤器实例，使用配置的路径模式
+     */
+    public GatewayFilter withPredicate(String predicate) {
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(this.jwtUtil);
+        
+        // 解析路径模式
+        if (predicate != null && predicate.startsWith("Path=")) {
+            String pathsStr = predicate.substring(5);
+            String[] paths = pathsStr.split(",\\s*");
+            for (String path : paths) {
+                // 去除通配符
+                path = path.replace("**", "").trim();
+                filter.protectedPaths.add(path);
+            }
+        }
+        
+        return filter;
     }
 
     @Override
@@ -40,6 +66,27 @@ public class JwtAuthenticationFilter implements GatewayFilter {
                 System.out.println("白名单路径，跳过认证: " + path);
                 return chain.filter(exchange);
             }
+        }
+        
+        // 检查是否需要JWT验证
+        boolean requiresJwt = false;
+        if (protectedPaths.isEmpty()) {
+            // 如果没有配置特定的保护路径，使用默认行为（所有路径都需要验证）
+            requiresJwt = true;
+        } else {
+            // 检查当前路径是否匹配任何需要保护的路径
+            for (String protectedPath : protectedPaths) {
+                if (path.startsWith(protectedPath)) {
+                    requiresJwt = true;
+                    break;
+                }
+            }
+        }
+        
+        // 如果不需要JWT验证，直接通过
+        if (!requiresJwt) {
+            System.out.println("路径不需要JWT验证，直接通过: " + path);
+            return chain.filter(exchange);
         }
         
         // 获取Authorization头

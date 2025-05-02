@@ -5,25 +5,41 @@ server:
 spring:
   application:
     name: api-gateway
+  # 添加RabbitMQ配置
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+  # 添加Redis配置
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+      # password: 
   cloud:
     gateway:
       routes:
-        - id: auth-service
+        - id: api-gateway-service
           uri: http://localhost:8082
           predicates:
-            - Path=/api/auth/**
+            - Path=/api/auth/**, /api/async-risk-assessment/**
+          filters:
+            - name: RewritePath
+              args:
+                regexp: /api/async-risk-assessment/(?<segment>.*)
+                replacement: /async-risk-assessment/${segment}
             
         - id: fee-query-service
           uri: http://localhost:8081
           predicates:
-            - Path=/api/settlements/**, /api/diagnosis-details/**, /api/fee-details/**
+            - Path=/api/settlements/**, /api/diagnosis-details/**, /api/fee-details/**, /api/outpatient-monitor/**
           filters:
-            - JwtAuthentication
-            
-        - id: outpatient-monitor-service
-          uri: http://localhost:8081
-          predicates:
-            - Path=/api/outpatient-monitor/**
+            - name: JwtAuthentication
+              args:
+                predicate: "Path=/api/settlements/**"
             
         - id: rule-engine-service
           uri: http://localhost:8083
@@ -39,13 +55,28 @@ spring:
           filters:
             - StripPrefix=0
 
-            
+      # 配置全局过滤器
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin
+        - name: Retry
+          args:
+            retries: 1
+            methods: GET,POST
       globalcors:
         corsConfigurations:
           '[/**]':
             allowedOrigins: '*'
             allowedMethods: '*'
             allowedHeaders: '*'
+      httpclient:
+        max-header-size: 262144  # 256KB
+        connect-timeout: 30000  # 30秒连接超时
+        response-timeout: 60000  # 60秒响应超时
+        
+  codec:
+    max-in-memory-size: 10MB  # 增加内存缓冲区大小
+  webflux:
+    base-path: /
 
 # 关闭Eureka客户端
 eureka:
@@ -56,4 +87,7 @@ logging:
   level:
     '[org.springframework.cloud.gateway]': DEBUG
     '[com.demo.filter]': DEBUG
-    '[reactor.netty]': INFO
+    '[org.springframework.amqp]': DEBUG
+
+
+

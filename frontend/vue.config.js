@@ -12,7 +12,7 @@ module.exports = defineConfig({
         onError: (err, req, res) => {
           console.error('代理错误:', err);
         }
-      }
+      },
     },
     hot: true,
     client: {

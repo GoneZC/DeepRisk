@@ -16,10 +16,18 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
     
     @Override
     public GatewayFilter apply(Config config) {
-        return jwtFilter;
+        return jwtFilter.withPredicate(config.getPredicate());
     }
     
     public static class Config {
-        // 配置属性（如果需要）
+        private String predicate;
+        
+        public String getPredicate() {
+            return predicate;
+        }
+        
+        public void setPredicate(String predicate) {
+            this.predicate = predicate;
+        }
     }
 } 

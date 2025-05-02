@@ -250,8 +250,8 @@ const login = async () => {
   try {
     console.log('开始登录请求...');
     const response = await axios.post('/api/auth/login', {
-      // username: 'admin',
-      username: 'hospital2',
+      username: 'admin',
+      // username: 'hospital2',
       password: '123'
     });
     
