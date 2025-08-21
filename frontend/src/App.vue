@@ -27,17 +27,11 @@
           <span>数据查询</span>
         </el-menu-item>
         
-        <!-- 新增：规则引擎 -->
-        <el-menu-item index="/rule-engine">
-          <el-icon><SetUp /></el-icon>
-          <span>规则引擎</span>
-        </el-menu-item>
-        
-        <!-- 智能审核改为深度分析 -->
+        <!-- 智能审核 -->
         <el-sub-menu index="/analysis">
           <template #title>
             <el-icon><Cpu /></el-icon>
-            <span>深度分析</span>
+            <span>智能审核</span>
           </template>
           
           <el-menu-item index="/analysis/outpatient">

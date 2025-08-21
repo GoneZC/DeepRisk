@@ -58,7 +58,7 @@ public class JwtAuthenticationFilter implements GatewayFilter {
         System.out.println("\n=== JWT过滤器开始处理请求 ===");
         System.out.println("请求路径: " + path);
         System.out.println("请求方法: " + request.getMethod());
-        System.out.println("请求头部: " + request.getHeaders());
+        // System.out.println("请求头部: " + request.getHeaders());
         
         // 检查是否是白名单URL
         for (String whitelistPath : whitelist) {
@@ -112,8 +112,8 @@ public class JwtAuthenticationFilter implements GatewayFilter {
             
             // 提取用户信息
             Claims claims = jwtUtil.extractAllClaims(token);
-            String userId = claims.getSubject();
-            String username = claims.getSubject();
+            String userId = claims.get("userId", String.class);
+            String username = claims.get("username", String.class);
             String role = claims.get("role", String.class);
             String hospitalCode = claims.get("hospitalCode", String.class);
             

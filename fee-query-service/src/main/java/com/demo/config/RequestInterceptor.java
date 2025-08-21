@@ -20,11 +20,11 @@ public class RequestInterceptor implements HandlerInterceptor {
                             @NonNull Object handler) {
         // 从请求头获取用户信息
         String userId = request.getHeader("X-User-Id");
+        String username = request.getHeader("X-User-Name");
         String role = request.getHeader("X-User-Role");
-        String hospitalCode = request.getHeader("X-Hospital-Code");
-        
-        // 将用户信息存入当前线程上下文
-        UserContext.setCurrentUser(new UserInfo(userId, role, hospitalCode));
+        String hospitalCode = request.getHeader("X-Hospital-Code");   
+        // 为当前线程设置用户上下文
+        UserContext.setCurrentUser(new UserInfo(userId, username, role, hospitalCode));
         return true;
     }
     
@@ -33,7 +33,7 @@ public class RequestInterceptor implements HandlerInterceptor {
                                @NonNull HttpServletResponse response, 
                                @NonNull Object handler, 
                                @Nullable Exception ex) {
-        // 清理线程上下文
+        // 清除用户上下文
         UserContext.clear();
     }
 } 

@@ -1,0 +1,39 @@
+[Unit]
+Description=Fee Query Service
+After=network.target mysql.service redis.service
+Wants=mysql.service redis.service
+
+[Service]
+Type=simple
+User=feeservice
+Group=feeservice
+WorkingDirectory=/opt/fee-query-service
+ExecStart=/usr/bin/java -Xms1g -Xmx2g -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Dspring.profiles.active=prod -jar /opt/fee-query-service/fee-query-service-1.0.0.jar
+ExecStop=/bin/kill -TERM $MAINPID
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=fee-query-service
+
+# 环境变量
+Environment=DB_USERNAME=app_user
+Environment=DB_PASSWORD=your_secure_password
+Environment=REDIS_HOST=localhost
+Environment=REDIS_PORT=6379
+Environment=SERVER_PORT=8081
+Environment=EUREKA_URL=http://localhost:8761/eureka/
+
+# 安全设置
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/log/fee-query-service /var/run
+
+# 资源限制
+LimitNOFILE=65536
+LimitNPROC=4096
+
+[Install]
+WantedBy=multi-user.target 

@@ -35,11 +35,9 @@ public class SettlementService {
         
         // 使用AopContext获取当前代理对象
         SettlementService proxy = (SettlementService) AopContext.currentProxy();
-        
         // 通过代理调用缓存方法
         List<Settlement> pageContent = proxy.getPagedSettlementList(mdtrtId, psnNo, medTypes, page, size);
         long totalElements = proxy.getSettlementCount(mdtrtId, psnNo, medTypes);
-        
         // 构建Page对象
         return new PageImpl<>(pageContent, PageRequest.of(page, size), totalElements);
     }
@@ -71,10 +69,10 @@ public class SettlementService {
         System.out.println("所有结算数据缓存已清除");
     }
 
+    // 创建查询条件
     private Specification<Settlement> createSpecification(String mdtrtId, String psnNo, List<String> medTypes) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            
             // 添加查询条件
             if (medTypes != null && !medTypes.isEmpty() && !medTypes.contains("")) {
                 predicates.add(root.get("medType").in(medTypes));
@@ -85,9 +83,10 @@ public class SettlementService {
             if (StringUtils.hasText(psnNo)) {
                 predicates.add(cb.equal(root.get("psnNo"), psnNo));
             }
-            
+
             // 根据用户角色添加数据权限过滤
             UserInfo userInfo = UserContext.getCurrentUser();
+
             if (userInfo != null) {
                 // 如果不是医保局角色，只能查看自己医院的数据
                 if (!"INSURANCE_BUREAU".equals(userInfo.getRole())) {
@@ -101,7 +100,7 @@ public class SettlementService {
                 // 如果没有用户信息，返回空结果集
                 predicates.add(cb.equal(cb.literal(1), 0));
             }
-            
+
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }

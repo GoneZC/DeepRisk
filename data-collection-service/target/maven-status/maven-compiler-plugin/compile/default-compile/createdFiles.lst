@@ -1,0 +1,14 @@
+com\demo\controller\DataCollectionController.class
+com\demo\config\BeanConfig.class
+com\demo\controller\WebSocketController.class
+com\demo\entity\FeeRecord.class
+com\demo\repository\FeeRecordRepository.class
+com\demo\config\WebSocketInterceptorConfig.class
+com\demo\config\WebSocketConfig.class
+com\demo\config\WebSocketInterceptorConfig$1.class
+com\demo\DataCollectionApplication.class
+com\demo\client\RuleEngineClient.class
+com\demo\config\CorsConfig.class
+com\demo\model\RuleResult.class
+com\demo\model\StatusUpdate.class
+com\demo\service\DataCollectionService.class

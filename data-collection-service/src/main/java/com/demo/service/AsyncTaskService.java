@@ -19,33 +19,7 @@ public class AsyncTaskService {
     @Autowired
     private RestTemplate restTemplate;
     
-    /**
-     * 异步触发规则引擎检查
-     */
-    @Async
-    public void triggerRuleEngineCheck(List<Map<String, Object>> feeDetails) {
-        try {
-            logger.info("开始异步触发规则引擎检查，数据记录数: {}", feeDetails.size());
-            
-            // // 调用规则引擎服务的API
-            // String ruleEngineUrl = "http://rule-engine-service/rules/check";
-            
-            // 通过API网关访问
-            String gatewayUrl = "http://api-gateway/api/rules/check";
-            
-            // 发送数据到API网关
-            Map<String, Object> response = restTemplate.postForObject(
-                gatewayUrl, 
-                feeDetails, 
-                Map.class
-            );
-            
-            logger.info("规则引擎检查触发成功，响应: {}", response);
-        } catch (Exception e) {
-            logger.error("触发规则引擎检查失败", e);
-            // 可以实现重试逻辑或将失败任务存入队列
-        }
-    }
+
 
     @Async("taskExecutor")
     public CompletableFuture<List<Map<String, Object>>> processDataAsync(

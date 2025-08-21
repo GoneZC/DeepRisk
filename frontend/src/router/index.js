@@ -4,7 +4,7 @@ import FeeQuery from '../views/FeeQuery.vue'
 import OutpatientMonitor from '../views/OutpatientMonitor.vue'
 import InpatientMonitor from '../views/InpatientMonitor.vue'
 import GroupFraudDetection from '../views/GroupFraudDetection.vue'
-import RuleEngine from '../views/RuleEngine.vue'
+
 
 const routes = [
   {
@@ -16,12 +16,7 @@ const routes = [
     path: '/fee-query',
     name: 'FeeQuery',
     component: FeeQuery
-  },
-  {
-    path: '/rule-engine',
-    name: 'RuleEngine',
-    component: RuleEngine
-  },
+      },
   {
     path: '/analysis/outpatient',
     name: 'OutpatientMonitor',

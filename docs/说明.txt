@@ -5,7 +5,7 @@
 要实现的功能: 
 (1)可视化看板:
 (2)数据查询: 查询结算信息表+点击详情查看费用明细
-(3)智能监管: 规则引擎实时检测(基于费用明细表,最小粒度为一个具体项目)+深度分析(最小粒度为医生一天的行为,针对不同场景使用不同的深度模型)
+(3)智能监管: 深度分析(最小粒度为医生一天的行为,针对不同场景使用不同的深度模型)
 
 显示的信息有: 
 表setl_d2409的字段:MDTRT_ID、PSN_NO、GEND、AGE、DISE_NAME、MED_TYPE、BEGNDATE、ENDDATE、MEDFEE_SUMAMT、FULAMT_OWNPAY_AMT、HIFP_PAY 
@@ -24,7 +24,7 @@ API网关服务：统一接入点，请求路由，负载均衡
 用户认证服务：用户管理，权限控制，令牌颁发
 数据采集服务：医疗数据收集与标准化，提供数据给其他服务使用
 费用查询服务：对数据实现不同粒度的查询
-规则引擎服务：实时检测费用明细异常
+
 深度分析服务：基于多个机器学习模型（Pytorch训练好的pt文件）的医生行为分析模型，使用DJL
 可视化服务：看板和图表展示
 公共服务：配置中心、日志收集、监控告警
@@ -92,11 +92,11 @@ API网关服务：统一接入点，请求路由，负载均衡
 │   │   └── test/
 │   └── pom.xml
 │
-├── rule-engine-service/          # 规则引擎服务
+
 │   ├── src/
 │   │   ├── main/
 │   │   │   ├── java/com/demo/
-│   │   │   │   ├── RuleEngineApplication.java
+
 │   │   │   │   ├── controller/
 │   │   │   │   ├── service/
 │   │   │   │   │   └── RuleService.java
@@ -154,7 +154,7 @@ API网关服务：统一接入点，请求路由，负载均衡
 │   │   ├── auth-service.service
 │   │   ├── data-collection.service
 │   │   ├── fee-query.service
-│   │   ├── rule-engine.service
+
 │   │   ├── deep-analysis.service
 │   │   └── visualization.service
 │   ├── scripts/                  # 部署和维护脚本

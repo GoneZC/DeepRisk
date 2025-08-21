@@ -39,13 +39,9 @@ public class FeeDetailService {
         // 从请求头获取医院ID和用户角色
         String hospitalId = request.getHeader("X-Hospital-Id");
         String userRole = request.getHeader("X-User-Role");
-        
-        // 医保局可查看所有数据
         if ("MEDICAL_INSURANCE_BUREAU".equals(userRole)) {
             return feeDetailRepo.findByMdtrtIdOrderByFeeOcurTimeAsc(mdtrtId);
         }
-        
-        // 医院只能查看自己的数据 - 直接使用fixmedinsCode字段
         return feeDetailRepo.findByMdtrtIdAndFixmedinsCode(mdtrtId, hospitalId);
     }
 }

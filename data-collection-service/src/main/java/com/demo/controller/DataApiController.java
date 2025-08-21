@@ -32,8 +32,7 @@ public class DataApiController {
         // 保存费用明细到数据库
         int processedRecords = dataService.saveFeeDetails(feeDetails);
         
-        // 异步触发规则引擎检查
-        asyncTaskService.triggerRuleEngineCheck(feeDetails);
+
         
         return createResponse("success", feeDetails.size(), processedRecords);
     }

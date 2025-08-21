@@ -30,13 +30,10 @@ public class AsyncRiskController {
      */
     @PostMapping("/assess")
     public Mono<ResponseEntity<String>> asyncAssessment(@RequestBody Map<String, Object> data) {
-        // 极简处理
         return Mono.fromCallable(() -> {
             String requestId = UUID.randomUUID().toString();
             data.put("requestId", requestId);
-            
             try {
-                // 直接发送对象，让RabbitTemplate的消息转换器处理序列化
                 rabbitTemplate.convertAndSend(
                     RabbitMQConfig.RISK_EXCHANGE,
                     RabbitMQConfig.RISK_ROUTING_KEY,

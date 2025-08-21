@@ -1,4 +1,11 @@
 {
     "java.compile.nullAnalysis.mode": "automatic",
-    "java.configuration.updateBuildConfiguration": "disabled"
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-17",
+            "path": "E:\\Java\\jdk-17",
+            "default": true
+        }
+    ],
+    "java.jdt.ls.java.home": "E:\\Java\\jdk-17"
 }

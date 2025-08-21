@@ -11,6 +11,9 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Collections;
+import com.demo.model.UserInfo;
+import com.demo.utils.UserContext;
+
 
 @RestController
 @RequestMapping("/api")
@@ -22,21 +25,19 @@ public class SettlementController {
     @PostMapping("/settlements/search")
     public Map<String, Object> searchSettlements(
         @RequestBody SearchRequest request) {
-        
-        System.out.println("接收参数:");
-        System.out.println("mdtrtId: " + request.getMdtrtId());
-        System.out.println("psnNo: " + request.getPsnNo());
-        System.out.println("medTypes: " + request.getMedTypes());
+
+        // 获取当前用户信息
+        UserInfo currentUser = UserContext.getCurrentUser();
+        System.out.println("当前用户信息：" + currentUser);
         
         List<String> medTypeList = request.getMedTypes() != null ? 
-            request.getMedTypes() // 直接使用前端传递的List
+            request.getMedTypes() 
             : Collections.emptyList();
-        System.out.println("medTypeList: " + medTypeList);
         Page<Settlement> pageResult = settlementService.searchSettlements(request.getMdtrtId(), request.getPsnNo(), request.getPage(), request.getSize(), medTypeList);
         Map<String, Object> response = new HashMap<>();
         response.put("data", pageResult.getContent());
         response.put("totalElements", pageResult.getTotalElements());
-        
+
         return response;
     }
     

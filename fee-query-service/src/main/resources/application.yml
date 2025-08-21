@@ -1,0 +1,145 @@
+spring:
+  application:
+    name: fee-query-service
+  profiles:
+    active: dev
+  datasource:
+    url: jdbc:mysql://localhost:3306/shenzhen_medical?useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      connection-timeout: 60000
+      maximum-pool-size: 15
+      minimum-idle: 5
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 60000
+      validation-timeout: 3000
+      connection-test-query: SELECT 1
+      register-mbeans: true
+      connection-init-sql: SET NAMES utf8mb4
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        generate_statistics: true
+        cache:
+          use_second_level_cache: false
+  data:
+    redis:
+      host: 172.20.10.164
+      port: 6379
+      timeout: 10000
+  cache:
+    redis:
+      time-to-live: 7200000
+      use-key-prefix: true
+      key-prefix: "demo:cache:"
+    type: redis
+
+server:
+  port: 8081
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+    instance-id: "${spring.application.name}:${server.port}"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # 暴露所有监控端点
+        include: "*"
+      # 自定义管理端口（可选，用于生产环境安全）
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+    # 启用线程转储
+    threaddump:
+      enabled: true
+    # 启用堆转储
+    heapdump:
+      enabled: true
+    # 启用JVM内存信息
+    memory:
+      enabled: true
+    # 启用环境信息
+    env:
+      enabled: true
+    # 启用配置属性
+    configprops:
+      enabled: true
+    # 启用Bean信息
+    beans:
+      enabled: true
+    # 启用性能指标
+    metrics:
+      enabled: true
+    # 启用Prometheus指标
+    prometheus:
+      enabled: true
+  # 监控服务端口（独立端口）
+  server:
+    port: 9081
+  # JMX监控
+  jmx:
+    exposure:
+      include: "*"
+  # 监控指标配置
+  metrics:
+    system:
+      diskspace:
+        enabled: true
+      processor:
+        enabled: true
+    jvm:
+      enabled: true
+    jdbc:
+      enabled: true
+    hikaricp:
+      enabled: true
+    redis:
+      enabled: true
+  # Prometheus指标导出
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+logging:
+  level:
+    root: WARN
+    com.demo: DEBUG
+    org.springframework.web: INFO
+    org.springframework.jdbc.core: DEBUG
+    org.springframework.cache: DEBUG
+    org.hibernate.engine.query.spi.QueryPlanCache: WARN
+    org.hibernate.type.descriptor.sql: TRACE
+    com.zaxxer.hikari: DEBUG
+    com.demo.service: TRACE 
+
+# OpenAPI/Swagger配置
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operationsSorter: method
+    tagsSorter: alpha
+    displayRequestDuration: true
+    docExpansion: none
+  packages-to-scan: com.demo.controller
+  paths-to-match: /api/**

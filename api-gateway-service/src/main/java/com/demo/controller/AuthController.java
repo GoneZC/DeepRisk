@@ -22,29 +22,36 @@ public class AuthController {
     public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> loginRequest) {
         String username = loginRequest.get("username");
         String password = loginRequest.get("password");
+
         
         System.out.println("用户是: " + username);
         // 简化认证逻辑，实际应用中应该查询数据库
         if ("admin".equals(username) && "123".equals(password)) {
             // 医保局管理员
-            String token = jwtUtil.generateToken("1", username, "INSURANCE_BUREAU", null);
+            String token = jwtUtil.generateToken("001", username, "INSURANCE_BUREAU", null);
             Map<String, Object> response = new HashMap<>();
+            response.put("userId", "001");
+            response.put("username", username);
             response.put("token", token);
             response.put("role", "INSURANCE_BUREAU");
             return ResponseEntity.ok(response);
         } else if ("hospital1".equals(username) && "123".equals(password)) {
             // 医院用户
-            String token = jwtUtil.generateToken("2", username, "HOSPITAL", "AAZGJONNU");
+            String token = jwtUtil.generateToken("002", username, "HOSPITAL", "AAZGJONNU");
             Map<String, Object> response = new HashMap<>();
             response.put("token", token);
+            response.put("userId", "002");
+            response.put("username", username);
             response.put("role", "HOSPITAL");
             response.put("hospitalCode", "AAZGJONNU");
             return ResponseEntity.ok(response);
         } else if ("hospital2".equals(username) && "123".equals(password)) {
             // 另一个医院用户
-            String token = jwtUtil.generateToken("3", username, "HOSPITAL", "AAZNJHLHC");
+            String token = jwtUtil.generateToken("003", username, "HOSPITAL", "AAZNJHLHC");
             Map<String, Object> response = new HashMap<>();
             response.put("token", token);
+            response.put("userId", "003");
+            response.put("username", username);
             response.put("role", "HOSPITAL");
             response.put("hospitalCode", "AAZNJHLHC");
             return ResponseEntity.ok(response);

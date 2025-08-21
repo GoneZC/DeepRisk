@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor      
 @AllArgsConstructor     
 public class DoctorCommunity {
-    
     @Id
     @Column(name = "BILG_DR_CODE")
     private String bilgDrCode;
