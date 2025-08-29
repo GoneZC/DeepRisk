@@ -14,12 +14,12 @@ class BertRiskEncoder(nn.Module):
     应用场景：
     - 用户画像风险评估
     - 交易行为语义理解
-    - 多维特征深度融合
+    - 多维特征融合
     
     技术特点：
-    - 利用BERT强大的语义理解能力
-    - 将结构化风险特征转换为高维语义表示
-    - 支持复杂特征关系建模
+    - 基于BERT的语义编码
+    - 结构化特征向量化
+    - 多维特征关系建模
     """
     
     def __init__(self, input_dim: int = 35, hidden_dim: int = 768, output_dim: int = 256):
@@ -223,17 +223,4 @@ class BertRiskDetector:
             logger.info(f"BERT风险模型加载成功: {model_path}")
         except Exception as e:
             logger.error(f"模型加载失败: {e}")
-            raise
-    
-    def save_model(self, save_path: str):
-        """保存模型"""
-        try:
-            torch.save({
-                'encoder_state_dict': self.bert_encoder.state_dict(),
-                'classifier_state_dict': self.risk_classifier.state_dict(),
-                'model_config': self.model_config
-            }, save_path)
-            logger.info(f"BERT风险模型已保存: {save_path}")
-        except Exception as e:
-            logger.error(f"模型保存失败: {e}")
             raise

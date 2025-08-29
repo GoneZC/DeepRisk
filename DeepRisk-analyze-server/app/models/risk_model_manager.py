@@ -355,32 +355,7 @@ class RiskModelManager:
             except Exception as e:
                 logger.error(f"{model_type.upper()}模型加载失败: {e}")
     
-    def save_all_models(self, save_dir: str):
-        """
-        保存所有模型
-        
-        Args:
-            save_dir: 保存目录
-        """
-        save_path = Path(save_dir)
-        save_path.mkdir(parents=True, exist_ok=True)
-        
-        # 保存配置
-        config_path = save_path / 'model_config.json'
-        with open(config_path, 'w', encoding='utf-8') as f:
-            json.dump(self.config, f, ensure_ascii=False, indent=2)
-        
-        # 保存各个模型
-        if self.bert_detector and self.models_loaded['bert']:
-            self.bert_detector.save_model(str(save_path / 'bert_model.pth'))
-        
-        if self.lstm_detector and self.models_loaded['lstm']:
-            self.lstm_detector.save_model(str(save_path / 'lstm_model.pth'))
-        
-        if self.gcn_detector and self.models_loaded['gcn']:
-            self.gcn_detector.save_model(str(save_path / 'gcn_model.pth'))
-        
-        logger.info(f"所有模型已保存到: {save_dir}")
+
 
 
 # 便捷函数

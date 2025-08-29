@@ -328,16 +328,3 @@ class SequenceRiskDetector:
         except Exception as e:
             logger.error(f"模型加载失败: {e}")
             raise
-    
-    def save_model(self, save_path: str):
-        """保存模型"""
-        try:
-            torch.save({
-                'model_state_dict': self.lstm_analyzer.state_dict(),
-                'model_config': self.model_config,
-                'baseline_patterns': self.baseline_patterns
-            }, save_path)
-            logger.info(f"LSTM时序模型已保存: {save_path}")
-        except Exception as e:
-            logger.error(f"模型保存失败: {e}")
-            raise

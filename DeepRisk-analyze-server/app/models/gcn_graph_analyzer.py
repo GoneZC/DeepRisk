@@ -450,16 +450,3 @@ class GraphRiskDetector:
         except Exception as e:
             logger.error(f"模型加载失败: {e}")
             raise
-    
-    def save_model(self, save_path: str):
-        """保存模型"""
-        try:
-            torch.save({
-                'analyzer_state_dict': self.graph_analyzer.state_dict(),
-                'classifier_state_dict': self.graph_risk_classifier.state_dict(),
-                'model_config': self.model_config
-            }, save_path)
-            logger.info(f"图网络风险模型已保存: {save_path}")
-        except Exception as e:
-            logger.error(f"模型保存失败: {e}")
-            raise
