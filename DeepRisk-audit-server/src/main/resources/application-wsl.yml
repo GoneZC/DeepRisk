@@ -1,0 +1,112 @@
+spring:
+  application:
+    name: audit-service
+  cloud:
+    compatibility-verifier:
+      enabled: false
+    nacos:
+      config:
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:public}
+        group: ${NACOS_GROUP:DEFAULT_GROUP}
+        file-extension: yaml
+        timeout: 3000
+        refresh-enabled: true
+      discovery:
+        server-addr: ${NACOS_SERVER_ADDR:localhost:8848}
+        namespace: ${NACOS_NAMESPACE:public}
+        group: ${NACOS_GROUP:DEFAULT_GROUP}
+        enabled: true
+  config:
+    import: "optional:nacos:audit-service.yaml"
+  datasource:
+    url: jdbc:mysql://${DB_HOST:172.20.0.1}:${DB_PORT:3306}/shenzhen_medical?useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:123456}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 30000
+      max-lifetime: 1800000
+      leak-detection-threshold: 30000
+      validation-timeout: 3000
+      connection-test-query: SELECT 1
+      register-mbeans: true
+      connection-init-sql: SET NAMES utf8mb4
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        use_sql_comments: false
+        generate_statistics: false
+        cache:
+          use_second_level_cache: false
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6380}
+      password: ${REDIS_PASSWORD:}
+      timeout: 10000
+  cache:
+    redis:
+      time-to-live: 7200000
+      use-key-prefix: true
+      key-prefix: "demo:cache:"
+    type: redis
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: ${RABBITMQ_VHOST:/}
+
+server:
+  port: ${SERVER_PORT:8081}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  server:
+    port: 9081
+
+logging:
+  level:
+    root: INFO
+    com.demo: INFO
+    org.springframework.web: WARN
+    org.springframework.jdbc.core: WARN
+    org.springframework.cache: WARN
+    org.hibernate: WARN
+    org.hibernate.SQL: WARN
+    org.hibernate.engine.internal.StatisticalLoggingSessionEventListener: WARN
+    com.zaxxer.hikari: WARN
+    org.springframework.boot.autoconfigure: WARN
+    org.springframework.boot.autoconfigure.condition: WARN
+    org.springframework.context.annotation: WARN
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# OpenAPI/Swagger配置
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operationsSorter: method
+    tagsSorter: alpha
+    displayRequestDuration: true
+    docExpansion: none
+  packages-to-scan: com.demo.controller
+  paths-to-match: /api/**
