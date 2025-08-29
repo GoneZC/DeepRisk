@@ -9,15 +9,6 @@
 
 研究生期间校企合作项目改造而来的开源智能风控平台，出于简化考虑仅展示核心模块。
 
-## ✨ 特性
-
-- 🔍 **智能风险检测**: 基于深度学习的异常检测算法
-- 📊 **实时监控看板**: 可视化的风险监控界面
-- 🏗️ **微服务架构**: 高可用、可扩展的系统设计
-- 🔄 **异步处理**: 基于消息队列的异步任务处理
-- 📈 **数据分析**: 多维度的数据统计和分析
-- 🛡️ **权限控制**: 基于角色的访问控制
-
 ## 问题背景
 
 数字化时代，金融、电商、医疗、互联网等行业面临日益复杂的风险挑战，传统规则引擎已无法适应多变的风险场景。主要痛点：
@@ -62,6 +53,7 @@ DeepRisk通过多种神经网络模型提取用户行为特征，再利用ANN (A
 ## 🚀 快速开始
 
 ### 环境要求
+
 - Docker 20.10+
 - Docker Compose 2.0+
 - Python 3.11+
@@ -74,12 +66,14 @@ DeepRisk通过多种神经网络模型提取用户行为特征，再利用ANN (A
 ### 安装部署
 
 1. **克隆项目**
+
 ```bash
 git clone https://github.com/your-username/DeepRisk_Server.git
 cd DeepRisk_Server
 ```
 
 2. **配置环境变量**
+
 ```bash
 # 复制环境变量模板
 cp .env.example .env
@@ -88,6 +82,7 @@ vim .env
 ```
 
 3. **启动服务**
+
 ```bash
 # 启动所有服务
 docker-compose up -d
@@ -97,12 +92,14 @@ docker-compose ps
 ```
 
 4. **访问系统**
+
 - 前端界面: http://localhost:8080
 - 默认账号: admin / demo123
 
 ### 开发环境搭建
 
 #### 后端服务 (Java)
+
 ```bash
 cd DeepRisk-audit-server
 mvn clean install
@@ -110,6 +107,7 @@ mvn spring-boot:run
 ```
 
 #### 分析服务 (Python)
+
 ```bash
 cd DeepRisk-analyze-server
 pip install -r requirements.txt
@@ -117,6 +115,7 @@ python main.py
 ```
 
 #### 前端服务 (Vue.js)
+
 ```bash
 cd DeepRisk-frontend
 npm install
@@ -134,6 +133,7 @@ npm run serve
 5. 开启 Pull Request
 
 ### 开发规范
+
 - 遵循现有代码风格
 - 添加适当的测试用例
 - 更新相关文档
@@ -150,6 +150,8 @@ npm run serve
 ## 📞 联系我们
 
 如有问题或建议，请通过以下方式联系：
+
 - 提交 Issue
 - 发送邮件至: [your-email@example.com]
 - 加入讨论群: [群号或链接]
+
