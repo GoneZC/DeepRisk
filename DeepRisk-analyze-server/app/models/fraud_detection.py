@@ -300,12 +300,13 @@ class FraudDetectionCore:
     
     def _calculate_risk_score(self, similar_entities: List[Dict]) -> float:
         """
-        根据相似实体列表计算风险得分
+        精细化风险得分计算逻辑
         
-        新的评分逻辑：
-        1. 基于相似实体的标签和相似度综合计算风险
-        2. 考虑相似度权重，相似度越高权重越大
-        3. 综合考虑高风险实体比例和相似度分布
+        核心思想：
+        1. 标签风险：恶意标签直接贡献风险分数
+        2. 相似度风险：低相似度表示异常行为，也是风险信号
+        3. 分布风险：考虑相似度分布的离散程度
+        4. 综合评估：多维度加权计算最终风险
         
         Args:
             similar_entities: 相似实体列表
@@ -314,63 +315,194 @@ class FraudDetectionCore:
             风险得分 (0-100)
         """
         if not similar_entities:
-            # 如果没有相似实体，默认返回中等风险
+            # 没有相似实体本身就是高风险信号
+            return 85.0
+        
+        similarities = [entity['similarity_score'] for entity in similar_entities]
+        labels = [entity['label'] for entity in similar_entities if entity['label'] is not None]
+        
+        # 1. 标签风险评估
+        label_risk = self._calculate_label_risk(labels)
+        
+        # 2. 相似度风险评估
+        similarity_risk = self._calculate_similarity_risk(similarities)
+        
+        # 3. 分布风险评估
+        distribution_risk = self._calculate_distribution_risk(similarities, labels)
+        
+        # 4. 综合风险计算（加权平均）
+        weights = {
+            'label': 0.4,      # 标签风险权重
+            'similarity': 0.35, # 相似度风险权重
+            'distribution': 0.25 # 分布风险权重
+        }
+        
+        final_risk = (
+            label_risk * weights['label'] +
+            similarity_risk * weights['similarity'] +
+            distribution_risk * weights['distribution']
+        )
+        
+        # 5. 特殊情况调整
+        final_risk = self._apply_special_adjustments(final_risk, similarities, labels)
+        
+        return max(0.0, min(100.0, final_risk))
+    
+    def _calculate_label_risk(self, labels: List[int]) -> float:
+        """
+        基于标签计算风险分数
+        
+        Args:
+            labels: 标签列表
+            
+        Returns:
+            标签风险分数 (0-100)
+        """
+        if not labels:
+            return 50.0  # 无标签信息，中等风险
+        
+        malicious_count = sum(1 for label in labels if label == 1)
+        total_count = len(labels)
+        malicious_ratio = malicious_count / total_count
+        
+        # 恶意标签比例越高，风险越大
+        base_risk = malicious_ratio * 100
+        
+        # 考虑恶意标签的集中度
+        if malicious_count > 0:
+            # 如果前几个结果中有恶意标签，风险更高
+            top3_malicious = sum(1 for i, label in enumerate(labels[:3]) if label == 1)
+            concentration_bonus = (top3_malicious / min(3, len(labels))) * 20
+            base_risk += concentration_bonus
+        
+        return min(100.0, base_risk)
+    
+    def _calculate_similarity_risk(self, similarities: List[float]) -> float:
+        """
+        基于相似度计算风险分数
+        
+        核心逻辑：相似度过低表示异常行为，也是风险信号
+        
+        Args:
+            similarities: 相似度列表
+            
+        Returns:
+            相似度风险分数 (0-100)
+        """
+        if not similarities:
+            return 90.0  # 无相似实体，高风险
+        
+        avg_similarity = np.mean(similarities)
+        max_similarity = max(similarities)
+        min_similarity = min(similarities)
+        
+        # 1. 平均相似度风险
+        if avg_similarity < 0.1:
+            # 平均相似度很低，高风险
+            avg_risk = 80.0
+        elif avg_similarity < 0.3:
+            # 平均相似度较低，中高风险
+            avg_risk = 60.0 + (0.3 - avg_similarity) * 100
+        elif avg_similarity > 0.8:
+            # 平均相似度很高，可能是正常行为
+            avg_risk = 10.0
+        else:
+            # 中等相似度，中等风险
+            avg_risk = 40.0 - (avg_similarity - 0.3) * 60
+        
+        # 2. 最高相似度风险
+        if max_similarity < 0.2:
+            # 连最相似的都不够相似，高风险
+            max_risk = 70.0
+        elif max_similarity > 0.9:
+            # 有非常相似的实体，低风险
+            max_risk = 5.0
+        else:
+            max_risk = 35.0 - (max_similarity - 0.2) * 42.8
+        
+        # 综合相似度风险
+        similarity_risk = (avg_risk * 0.7 + max_risk * 0.3)
+        
+        return max(0.0, min(100.0, similarity_risk))
+    
+    def _calculate_distribution_risk(self, similarities: List[float], labels: List[int]) -> float:
+        """
+        基于相似度和标签分布计算风险
+        
+        Args:
+            similarities: 相似度列表
+            labels: 标签列表
+            
+        Returns:
+            分布风险分数 (0-100)
+        """
+        if not similarities:
             return 50.0
         
-        # 计算加权风险分数
-        total_weight = 0.0
-        weighted_risk = 0.0
-        
-        # 获取相似度范围用于归一化
-        similarities = [doc['similarity_score'] for doc in similar_entities]
-        min_sim = min(similarities)
-        max_sim = max(similarities)
-        range_sim = max_sim - min_sim if max_sim != min_sim else 1.0
-        
-        for entity in similar_entities:
-            similarity_score = entity['similarity_score']
-            label = entity['label']
-            
-            # 计算归一化相似度（越相似值越大）
-            normalized_similarity = (similarity_score - min_sim) / range_sim if range_sim > 0 else 0.5
-            # 转换为权重（越相似权重越大）
-            weight = 0.1 + 0.9 * normalized_similarity  # 权重范围在0.1-1.0之间
-            
-            # 标签为1的实体风险值高，标签为0的实体风险值低
-            risk_value = 100.0 if label == 1 else 0.0
-            
-            # 累加加权风险
-            weighted_risk += risk_value * weight
-            total_weight += weight
-        
-        # 计算加权平均风险分数
-        if total_weight > 0:
-            risk_score = weighted_risk / total_weight
+        # 1. 相似度分布的离散程度
+        similarity_std = np.std(similarities)
+        if similarity_std > 0.3:
+            # 相似度分布很分散，可能是异常
+            dispersion_risk = 60.0
+        elif similarity_std < 0.05:
+            # 相似度分布很集中，相对正常
+            dispersion_risk = 20.0
         else:
-            risk_score = 50.0  # 默认中等风险
+            dispersion_risk = 20.0 + (similarity_std - 0.05) * 160
+        
+        # 2. 标签与相似度的一致性
+        consistency_risk = 30.0  # 默认值
+        if labels and len(labels) == len(similarities):
+            # 检查高相似度是否对应安全标签
+            high_sim_indices = [i for i, sim in enumerate(similarities) if sim > 0.5]
+            if high_sim_indices:
+                safe_high_sim = sum(1 for i in high_sim_indices if i < len(labels) and labels[i] == 0)
+                consistency_ratio = safe_high_sim / len(high_sim_indices)
+                # 高相似度对应安全标签比例越高，风险越低
+                consistency_risk = 60.0 * (1 - consistency_ratio)
+        
+        return (dispersion_risk * 0.6 + consistency_risk * 0.4)
+    
+    def _apply_special_adjustments(self, base_risk: float, similarities: List[float], labels: List[int]) -> float:
+        """
+        应用特殊情况的风险调整
+        
+        Args:
+            base_risk: 基础风险分数
+            similarities: 相似度列表
+            labels: 标签列表
             
-        # 考虑高风险实体比例因素
-        high_risk_count = sum(1 for doc in similar_entities if doc['label'] == 1)
-        high_risk_ratio = high_risk_count / len(similar_entities)
+        Returns:
+            调整后的风险分数
+        """
+        adjusted_risk = base_risk
         
-        # 如果高风险实体比例很高，适当提高评分
-        if high_risk_ratio > 0.5:
-            risk_score = min(100.0, risk_score * (1 + 0.2 * (high_risk_ratio - 0.5)))
-        elif high_risk_ratio < 0.1:
-            # 如果高风险实体比例很低，适当降低评分
-            risk_score = max(0.0, risk_score * (1 - 0.3 * (0.1 - high_risk_ratio)))
+        # 1. 极端相似度情况
+        if similarities:
+            min_sim = min(similarities)
+            if min_sim < 0.01:
+                # 存在极低相似度，额外风险
+                adjusted_risk += 15.0
+            
+            max_sim = max(similarities)
+            if max_sim > 0.95:
+                # 存在极高相似度，降低风险
+                adjusted_risk -= 10.0
         
-        # 考虑相似度的整体水平
-        avg_similarity = np.mean(similarities)
-        if avg_similarity < 0.05:
-            # 相似度很低，说明这是个特殊的向量，降低风险评分
-            risk_score *= 0.7
-        elif avg_similarity > 0.3:
-            # 相似度很高，提高风险评分
-            risk_score = min(100.0, risk_score * 1.2)
+        # 2. 全部正常标签但低相似度的情况（用户特别提到的场景）
+        if labels and all(label == 0 for label in labels):
+            avg_similarity = np.mean(similarities) if similarities else 0
+            if avg_similarity < 0.2:
+                # 全部正常标签但相似度很低，这是异常信号
+                adjusted_risk = max(adjusted_risk, 65.0)
+                logger.info(f"检测到异常模式：全部正常标签但低相似度(avg={avg_similarity:.3f})，风险分数调整为{adjusted_risk}")
         
-        # 确保得分在合理范围内
-        return max(0.0, min(100.0, risk_score))
+        # 3. 数据质量调整
+        if len(similarities) < 5:
+            # 相似实体太少，增加不确定性风险
+            adjusted_risk += 10.0
+        
+        return adjusted_risk
     
     def _get_risk_level(self, risk_score: float) -> str:
         """
