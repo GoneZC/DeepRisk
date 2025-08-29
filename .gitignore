@@ -314,13 +314,13 @@ cython_debug/
 # Application specific
 nacos-data/
 data/models/
-*.jpg
-*.png
-*.jpeg
-*.gif
+# *.jpg
+# *.png
+# *.jpeg
+# *.gif
 *.bmp
 *.tiff
-*.svg
+# *.svg
 
 # Database
 *.db
